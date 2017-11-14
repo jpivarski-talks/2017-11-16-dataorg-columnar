@@ -375,9 +375,9 @@ $\to$ suggests array database (e.g.\ SciDB) or object store (e.g.\ Ceph)
 
 \vspace{0.2 cm}
 \begin{itemize}
-\item<1-> Server-bound file view would have many users, ``home directories.''
+\item<1-> A server-bound file view would have many users, ``home directories.''
 \item<2-> Adopt object store's security model.
-\item<3-> Same baskets would be identified by object store keys. No fragmentation concerns and objects are replicated.
+\item<3-> Same baskets would be identified by object store keys. No fragmentation concerns and objects get replicated.
 \item<4-> No artificial boundaries in the dataset: only segmented into baskets, which are hidden from users.
 \item<5-> Need to develop new interfaces to share basket data among versioned datasets and track provenance.
 \end{itemize}
@@ -385,11 +385,16 @@ $\to$ suggests array database (e.g.\ SciDB) or object store (e.g.\ Ceph)
 \end{frame}
 
 \begin{frame}{}
+\vspace{0.5 cm}
+\Large
 
+\textcolor{darkblue}{Questions for HEP:} any use-case concerns? Missing features?
 
+\vspace{1 cm}
+\textcolor{darkblue}{Questions for others:} does this look familiar? Do you have
 
-
-
+\vspace{0.2 cm}
+experience with systems like this? If so, what worked/didn't work?
 \end{frame}
 
 \end{document}
