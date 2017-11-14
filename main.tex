@@ -140,8 +140,55 @@ Rowwise $\to$ columnar is a transposition for tabular data; nested data is more 
 \end{frame}
 
 \begin{frame}{}
-\vspace{0.5 cm}
+\begin{center}
+\begin{minipage}{0.8\linewidth}
+\begin{center}
+\Large Although we know how to save and retrieve data in columnar form, we still manage data {\it as files.}
+\end{center}
+\end{minipage}
+\end{center}
 
+\vspace{0.5 cm}
+Whether it's a ROOT file or a Parquet file, the file structure glues a set of columns together to be downloaded, replicated, versioned, or migrated to colder storage {\it as a unit.}
+\end{frame}
+
+\begin{frame}{Why is this a problem?}
+\vspace{0.5 cm}
+\textcolor{darkblue}{The reason columnar data is so useful is because each end-user analysis requires a minority of the data columns.}
+
+\vspace{0.25 cm}
+\begin{uncoverenv}<2->
+\begin{center}
+\begin{minipage}{0.9\linewidth}
+\begin{itemize}
+\item ``Monojet analysis'' \textcolor{gray}{only needs jet objects, but it needs jets constructed many different ways to study systematics.}
+\item ``Boosted top search'' \textcolor{gray}{needs jets with substructure variables.}
+\item ``Heavy flavor study'' \textcolor{gray}{needs jets, electrons, and muons with isolation and B-tagging variables.}
+\item ``Diphoton Higgs mass'' \textcolor{gray}{needs photons, electrons for a veto, and converted pair electrons.}
+\item \ldots
+\end{itemize}
+\end{minipage}
+\end{center}
+\end{uncoverenv}
+
+\vspace{0.25 cm}
+\uncover<3->{Within each particle object, the kinematic variables ($p_T$, $\eta$, $\phi$, $m$) are needed the most, with ``isolation/tagging/matching/\ldots'' needed by different analyses \mbox{to varying degrees.\hspace{-1 cm}}}
+
+\begin{uncoverenv}<4->
+\vspace{-5 cm}
+\begin{center}
+\fcolorbox{black}{white}{\begin{minipage}{0.9\linewidth}
+\vspace{0.5 cm}
+\begin{center}
+\begin{minipage}{0.95\linewidth}
+Columnar data lets us read relevant attributes from disk (or with XRootD, over the network) one at a time, but our data management systems are unaware of how to open up a ROOT file and operate on individual columns.
+\end{minipage}
+\end{center}
+\vspace{0.2 cm}
+\end{minipage}}
+\end{center}
+\vspace{5 cm}
+\end{uncoverenv}
 \end{frame}
 
 
