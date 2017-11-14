@@ -191,5 +191,30 @@ Columnar data lets us read relevant attributes from disk (or with XRootD, over t
 \end{uncoverenv}
 \end{frame}
 
+\begin{frame}{What could we do if data management were column-aware?}
+\vspace{0.15 cm}
+\mbox{\hspace{-0.5 cm}\begin{columns}
+\column{1.1\linewidth}
+\begin{description}\setlength{\itemsep}{0.2 cm}
+\item[Case 1:]<1-> \textcolor{darkblue}{serve most desirable attributes from RAM or SSD and less desirable attributes of the same dataset from disk or tape.}
+
+\vspace{0.2 cm}
+Currently, we make 2 or 3 levels of ``slimmed'' copies (AOD/MiniAOD/NanoAOD) to serve with different latencies. Three sizes does not fit all, so individual analyses make their own subsets (and have to find storage on their own).
+
+\item[Case 2:]<2-> \textcolor{darkblue}{define datasets with overlapping sets of physical columns.}
+
+\vspace{0.2 cm}
+For instance, version~1 has incorrect jet energy corrections; version~2 is just like it but with different jet energies. Versions~1 and 2 should point to the same data and share storage for all other columns. (Currently, users share recipes!)
+
+\item[Case 3:]<3-> \textcolor{darkblue}{provide zero-copy views of selected particles or events through stencils/bitmaps.}
+
+\vspace{0.2 cm}
+Currently, users make ``skimmed'' copies, which use more space and can't benefit from version updates such as the jet energy correction example above.
+
+\item[Case 4:]<4-> \textcolor{darkblue}{accelerate selections with database-style indexing.}
+\end{description}
+\end{columns}}
+\end{frame}
+
 
 \end{document}
