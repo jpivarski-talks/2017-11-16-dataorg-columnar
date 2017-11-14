@@ -52,9 +52,50 @@
 
 % START START START START START START START START START START START START START
 
-\begin{frame}{First slide}
+\begin{frame}{Nature of this talk}
 \vspace{0.5 cm}
-HERE
+\begin{columns}
+\column{1.05\linewidth}
+\Large This talk isn't about how we manage data in HEP, but how we {\it might.}
+\end{columns}
+
+\vspace{0.5 cm}
+\begin{itemize}\setlength{\itemsep}{0.25 cm}
+\item \Large Therefore, it isn't a ``how-to'' talk but a ``what-if'' talk.
+\item \Large If you have experience in this, we want to hear from you!
+\end{itemize}
 \end{frame}
+
+\begin{frame}{Columnar data}
+\vspace{0.25 cm}
+\begin{columns}
+\column{0.45\linewidth}
+Serializing data in columns is an old idea in HEP:
+
+\vspace{0.25 cm}
+\begin{itemize}
+\item \textcolor{darkblue}{1989:} Column-Wise-N-tuples (CWN) in PAW
+\item \textcolor{darkblue}{1996:} ``split'' (columnar) C++ objects in ROOT
+
+\vspace{0.25 cm}
+\ldots
+
+\vspace{0.25 cm}
+\item \textcolor{darkblue}{2002:} MonetDB
+\item \textcolor{darkblue}{2005:} C-Store (Vertica)
+\item \textcolor{darkblue}{2010:} Google Dremel paper
+\item \textcolor{darkblue}{2013:} Apache Parquet
+\end{itemize}
+
+\column{0.55\linewidth}
+\includegraphics[width=\linewidth]{columnar-vs-rowwise-sap.png}
+\end{columns}
+\end{frame}
+
+
+
+
+
+
 
 \end{document}
