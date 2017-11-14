@@ -92,10 +92,41 @@ Serializing data in columns is an old idea in HEP:
 \end{columns}
 \end{frame}
 
+\begin{frame}{Hierarchically nested columnar data}
+\vspace{0.25 cm}
+Rowwise $\to$ columnar is a transposition for tabular data; nested data is more complex.
 
+\begin{uncoverenv}<2->
+\vspace{0.25 cm}
+\textcolor{darkblue}{Example:} {\tt\small vector<vector<pair<char, int>>>}
 
+\vspace{0.25 cm}
+\begin{tabular}{r l}
+\small logical data & {\tt\scriptsize \textcolor{white}{[}\textcolor{blue}{[}\textcolor{violet}{[}(\textcolor{darkorange}{a},\textcolor{darkgreen}{1}), (\textcolor{darkorange}{b},\textcolor{darkgreen}{2}), (\textcolor{darkorange}{c},\textcolor{darkgreen}{3}), (\textcolor{darkorange}{d},\textcolor{darkgreen}{4})\textcolor{violet}{]}, \textcolor{violet}{[]}, \textcolor{violet}{[}(\textcolor{darkorange}{e},\textcolor{darkgreen}{5}), (\textcolor{darkorange}{f},\textcolor{darkgreen}{6})\textcolor{violet}{]}\textcolor{blue}{]}, \textcolor{blue}{[]}, \textcolor{blue}{[}\textcolor{violet}{[}(\textcolor{darkorange}{g},\textcolor{darkgreen}{7})\textcolor{violet}{]}\textcolor{blue}{]}\ \textcolor{white}{]}} \\\hline
+\small outer offsets & {\tt\scriptsize \textcolor{blue}{[0,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 3,\ \ 3,\ \ \ \ \ \ \ 4]}} \\
+\small inner offsets & {\tt\scriptsize \textcolor{violet}{[\ 0,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 4,\ \ 4,\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 6,\ \ \ \ \ \ 7]}} \\
+\small 1$^{\mbox{\scriptsize st}}$ attribute & {\tt\scriptsize \textcolor{darkorange}{[\ \ \ a,\ \ \ \ \ b,\ \ \ \ \ c,\ \ \ \ \ d,\ \ \ \ \ \ \ \ \ \ \ e,\ \ \ \ \ f,\ \ \ \ \ \ \ \ \ \ \ \ \ g\ \ \ \ \ \ ]}} \\
+\small 2$^{\mbox{\scriptsize nd}}$ attribute & {\tt\scriptsize \textcolor{darkgreen}{[\ \ \ \ \ 1,\ \ \ \ \ 2,\ \ \ \ \ 3,\ \ \ \ \ 4,\ \ \ \ \ \ \ \ \ \ \ 5,\ \ \ \ \ 6,\ \ \ \ \ \ \ \ \ \ \ \ \ 7\ \ \ \ ]}}
+\end{tabular}
+\end{uncoverenv}
 
+\begin{itemize}
+\item<3-> Each primitive attribute is in an array by itself, with no list boundaries.
+\item<4-> Offset array: starting index of nested data at each open bracket; total size at end.
+\item<5-> Alternate representations:
+\begin{itemize}
+\item<5-> stops: {\tt\scriptsize stops = offsets[1:]} (one value per item; can't drop prefix without a copy)
+\item<6-> starts and stops: {\tt\scriptsize starts = offsets[:-1]; stops = offsets[1:]} (full slicing, including arbitrary skips, without a copy; even save out of order for indexed lookups)
+\item<7-> sizes: {\tt\scriptsize sizes = stops - starts} (compressible; create in parallel; can't $\mathcal{O}(1)$ lookup)
+\item<8-> Dremel/Parquet: ``repetition level'' (packed small integers; can't $\mathcal{O}(1)$ lookup)
+\end{itemize}
+\end{itemize}
+\end{frame}
 
+\begin{frame}{}
+\vspace{0.5 cm}
+
+\end{frame}
 
 
 \end{document}
