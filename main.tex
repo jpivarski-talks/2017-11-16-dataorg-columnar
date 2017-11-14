@@ -121,7 +121,7 @@ Rowwise $\to$ columnar is a transposition for tabular data; nested data is more 
 \begin{itemize}
 \item<3-> Each primitive attribute is in an array by itself, with no list boundaries.
 \item<4-> Stops array: cumulative number of items for some level at each {\it closing} bracket.
-\item<5-> Alternative representations:
+\item<5-> \textcolor{darkblue}{Alternative representations:}
 \begin{itemize}
 \item<5-> Offsets (Arrow): include {\it starting} index; can represent interval slices without copying.
 \item<6-> Starts and stops: {\tt\scriptsize starts, stops = offsets[:-1], offsets[1:]}; can represent union of interval slices without copying, even save out of order for indexed lookups.
