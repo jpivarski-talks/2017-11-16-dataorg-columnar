@@ -149,7 +149,7 @@ Rowwise $\to$ columnar is a transposition for tabular data; nested data is more 
 \end{center}
 
 \vspace{0.5 cm}
-Whether it's ROOT or Parquet, a file structure glues a set of columns together to be downloaded, replicated, versioned, or migrated to colder storage {\it as a unit.}
+\uncover<2->{Whether it's ROOT or Parquet, the file structure glues a set of columns together to be downloaded, replicated, versioned, or migrated to colder storage {\it as a unit.}}
 \end{frame}
 
 \begin{frame}{Why is this a problem?}
@@ -181,7 +181,7 @@ Whether it's ROOT or Parquet, a file structure glues a set of columns together t
 \vspace{0.5 cm}
 \begin{center}
 \begin{minipage}{0.95\linewidth}
-Columnar data lets us read relevant attributes from disk (or with XRootD, over the network) one at a time, but our data management systems are unaware of how to open up a ROOT file and operate on individual columns.
+Columnar data lets us read relevant attributes from disk one at a time (or with XRootD, over the network), but data management systems are unaware of how to open up a ROOT file and operate on individual columns.
 \end{minipage}
 \end{center}
 \vspace{0.2 cm}
@@ -196,29 +196,31 @@ Columnar data lets us read relevant attributes from disk (or with XRootD, over t
 \mbox{\hspace{-0.5 cm}\begin{columns}
 \column{1.1\linewidth}
 \begin{description}\setlength{\itemsep}{0.2 cm}
-\item[Case 1:]<1-> \textcolor{darkblue}{serve most desirable attributes from RAM or SSD and less desirable attributes of the same dataset from disk or tape.}
+\item[Case 1:]<1-> \textcolor{darkblue}{serve the most desirable attributes from RAM or SSD and less desirable attributes of the same dataset from disk or tape.}
 
 \vspace{0.2 cm}
-Currently, we make 2 or 3 levels of ``slimmed'' copies (AOD/MiniAOD/NanoAOD) to serve with different latencies. Three sizes does not fit all, so individual analyses make their own subsets (and have to find storage on their own).
+Currently, we make 2 or 3 levels of ``slimmed'' copies (AOD/MiniAOD/NanoAOD) to serve with different latencies. Three sizes does not fit all, so individual analyses make their own subsets (and have to find their own storage).
 
 \item[Case 2:]<2-> \textcolor{darkblue}{define datasets with overlapping sets of physical columns.}
 
 \vspace{0.2 cm}
-For instance, version~1 has incorrect jet energy corrections; version~2 is just like it but with different jet energies. Versions~1 and 2 should point to the same data and share storage for all other columns. (Currently, users distribute recipes!)
+For instance, version~1 has incorrect jet energy corrections; version~2 is just like it but with different jet energies. Versions~1 and 2 should share the same physical storage for all other columns. (Currently, users pass around {\it correction recipes!})
 
 \item[Case 3:]<3-> \textcolor{darkblue}{provide zero-copy views of selected particles or events through stencils/bitmaps.}
 
 \vspace{0.2 cm}
 Currently, users make ``skimmed'' copies, which use more space and can't benefit from version updates such as the jet energy correction example above.
 
-\item[Case 4:]<4-> \textcolor{darkblue}{accelerate selections with database-style indexing.}
+\item[Case 4:]<4-> \textcolor{darkblue}{speed up filtering with database-style indexing.}
 \end{description}
 \end{columns}}
 \end{frame}
 
 \begin{frame}{Case 1: lower latency for popular columns}
 \vspace{0.5 cm}
+Same object-array mapping example:
 
+\vspace{0.25 cm}
 \begin{tabular}{r l}
 \small logical data & {\tt\scriptsize \textcolor{blue}{[}\textcolor{violet}{[}(\textcolor{darkorange}{a},\textcolor{darkgreen}{1}), (\textcolor{darkorange}{b},\textcolor{darkgreen}{2}), (\textcolor{darkorange}{c},\textcolor{darkgreen}{3}), (\textcolor{darkorange}{d},\textcolor{darkgreen}{4})\textcolor{violet}{]}, \textcolor{violet}{[]}, \textcolor{violet}{[}(\textcolor{darkorange}{e},\textcolor{darkgreen}{5}), (\textcolor{darkorange}{f},\textcolor{darkgreen}{6})\textcolor{violet}{]}\textcolor{blue}{]}, \textcolor{blue}{[]}, \textcolor{blue}{[}\textcolor{violet}{[}(\textcolor{darkorange}{g},\textcolor{darkgreen}{7})\textcolor{violet}{]}\textcolor{blue}{]}\ \textcolor{white}{]}} \\\hline
 \small outer stops & {\tt\scriptsize \textcolor{blue}{[\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 3,\ \ 3,\ \ \ \ \ \ \ \ \ 4]}} \\
@@ -228,14 +230,14 @@ Currently, users make ``skimmed'' copies, which use more space and can't benefit
 \end{tabular}
 
 \vspace{0.5 cm}
-If the numbers are more popular than the letters, raise the 2$^{\mbox{\scriptsize nd}}$ attribute into warmer cache (on the server) independently of the letters.
+If the 2$^{\mbox{\scriptsize nd}}$ attribute is more popular than the 1$^{\mbox{\scriptsize st}}$ attribute, raise the 2$^{\mbox{\scriptsize nd}}$ attribute into warmer cache (on the server).
 
 \vspace{0.5 cm}
-To the degree that analysts' interests overlap (e.g.\ the all-popular kinematic variables), a copy in hot cache may be shared by all. This is impossible for private skims.
+To the degree that analysts' interests overlap (e.g.\ the all-popular kinematic variables), one copy in hot cache may be shared by all. This is impossible for private skims.
 \end{frame}
 
 \begin{frame}[fragile]{Case 2: overlapping dataset definitions}
-\vspace{1 cm}
+\vspace{0.5 cm}
 
 \begin{columns}
 \column{1.05\linewidth}
@@ -275,7 +277,7 @@ List(stops = "outer stops",
 \end{verbatim}}
 \end{columns}
 
-\vspace{-0.5 cm}
+\vspace{-0.25 cm}
 \textcolor{gray}{(Not all arrays can be combined into datasets; validity determined by provenance.)}
 \end{frame}
 
@@ -300,8 +302,8 @@ List(stops = "outer stops",
 
 \vspace{0.25 cm}
 \begin{itemize}
-\item inner starts/stops (v2) keeps only the first pair of each sublist.
-\item outer starts/stops (v2) keeps only the two sublists.
+\item inner starts/stops (v2) keeps only the first pair of each sublist: particle selection.
+\item outer starts/stops (v2) keeps only the first two sublists: event selection.
 \item<2-> If a new 2$^{\mbox{\scriptsize nd}}$ attribute is created, we can immediately update the selected data.
 \end{itemize}
 \end{frame}
@@ -333,9 +335,61 @@ List(stops = "outer stops",
 \end{itemize}
 \end{frame}
 
-\begin{frame}{}
-HERE
+\begin{frame}{How might it be implemented?}
+\vspace{0.5 cm}
+This is not an Object-Relational Mapping (ORM): the order of the arrays is important and they should be served in contiguous blocks.
+\begin{center}
+$\to$ suggests array database (e.g.\ SciDB) or object store (e.g.\ Ceph)
+\end{center}
+
+\vspace{0.25 cm}
+\begin{uncoverenv}<2->
+\begin{description}
+\item[Option 1:] define an Object-Array Mapping (OAM), build an interpretive layer around an object store, and translate HEP data into it.
+
+\item[Option 2:] use ROOT's OAM and interpretive layer, but replace its file-backed storage with the object store.
+\end{description}
+\end{uncoverenv}
+
+\vspace{0.5 cm}
+\uncover<3->{\textcolor{darkblue}{Option 2} is more limited (no start/stop arrays), but less needs to be invented and old analysis scripts would function in the new system.}
 \end{frame}
 
+\begin{frame}{ROOT I/O $\to$ ROOT object store}
+\vspace{0.35 cm}
+\begin{columns}[t]
+\column{0.5\linewidth}
+\underline{\large\bf ROOT I/O}
+
+\vspace{0.2 cm}
+\begin{itemize}
+\item<1-> File accessed by a single user contains objects and subdirectories.
+
+\vspace{\baselineskip}
+\item<3-> Segments of columnar arrays called ``baskets'' are located in the file, identified by file seek positions.
+\item<4-> Users typically access a large number of identically typed files.
+\end{itemize}
+
+\column{0.5\linewidth}
+\underline{\large\bf ROOT object store}
+
+\vspace{0.2 cm}
+\begin{itemize}
+\item<1-> Server-bound file view would have many users, ``home directories.''
+\item<2-> Adopt object store's security model.
+\item<3-> Same baskets would be identified by object store keys. No fragmentation concerns and objects are replicated.
+\item<4-> No artificial boundaries in the dataset: only segmented into baskets, which are hidden from users.
+\item<5-> Need to develop new interfaces to share basket data among versioned datasets and track provenance.
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{}
+
+
+
+
+
+\end{frame}
 
 \end{document}
