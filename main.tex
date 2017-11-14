@@ -149,7 +149,7 @@ Rowwise $\to$ columnar is a transposition for tabular data; nested data is more 
 \end{center}
 
 \vspace{0.5 cm}
-Whether it's a ROOT file or a Parquet file, the file structure glues a set of columns together to be downloaded, replicated, versioned, or migrated to colder storage {\it as a unit.}
+Whether it's ROOT or Parquet, a file structure glues a set of columns together to be downloaded, replicated, versioned, or migrated to colder storage {\it as a unit.}
 \end{frame}
 
 \begin{frame}{Why is this a problem?}
@@ -204,7 +204,7 @@ Currently, we make 2 or 3 levels of ``slimmed'' copies (AOD/MiniAOD/NanoAOD) to 
 \item[Case 2:]<2-> \textcolor{darkblue}{define datasets with overlapping sets of physical columns.}
 
 \vspace{0.2 cm}
-For instance, version~1 has incorrect jet energy corrections; version~2 is just like it but with different jet energies. Versions~1 and 2 should point to the same data and share storage for all other columns. (Currently, users share recipes!)
+For instance, version~1 has incorrect jet energy corrections; version~2 is just like it but with different jet energies. Versions~1 and 2 should point to the same data and share storage for all other columns. (Currently, users distribute recipes!)
 
 \item[Case 3:]<3-> \textcolor{darkblue}{provide zero-copy views of selected particles or events through stencils/bitmaps.}
 
@@ -216,5 +216,67 @@ Currently, users make ``skimmed'' copies, which use more space and can't benefit
 \end{columns}}
 \end{frame}
 
+\begin{frame}{Case 1: lower latency for popular columns}
+\vspace{0.5 cm}
+
+\begin{tabular}{r l}
+\small logical data & {\tt\scriptsize \textcolor{blue}{[}\textcolor{violet}{[}(\textcolor{darkorange}{a},\textcolor{darkgreen}{1}), (\textcolor{darkorange}{b},\textcolor{darkgreen}{2}), (\textcolor{darkorange}{c},\textcolor{darkgreen}{3}), (\textcolor{darkorange}{d},\textcolor{darkgreen}{4})\textcolor{violet}{]}, \textcolor{violet}{[]}, \textcolor{violet}{[}(\textcolor{darkorange}{e},\textcolor{darkgreen}{5}), (\textcolor{darkorange}{f},\textcolor{darkgreen}{6})\textcolor{violet}{]}\textcolor{blue}{]}, \textcolor{blue}{[]}, \textcolor{blue}{[}\textcolor{violet}{[}(\textcolor{darkorange}{g},\textcolor{darkgreen}{7})\textcolor{violet}{]}\textcolor{blue}{]}\ \textcolor{white}{]}} \\\hline
+\small outer stops & {\tt\scriptsize \textcolor{blue}{[\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 3,\ \ 3,\ \ \ \ \ \ \ \ \ 4]}} \\
+\small inner stops & {\tt\scriptsize \textcolor{violet}{[\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 4,\ \ 4,\ \ \ \ \ \ \ \ \ \ \ \ \ \ 6,\ \ \ \ \ \ \ \ \ \ \ \ \ 7\ ]}} \\
+\small 1$^{\mbox{\scriptsize st}}$ attribute & {\tt\scriptsize \textcolor{darkorange}{[\ \ a,\ \ \ \ \ b,\ \ \ \ \ c,\ \ \ \ \ d,\ \ \ \ \ \ \ \ \ \ \ e,\ \ \ \ \ f,\ \ \ \ \ \ \ \ \ \ \ \ \ g\ \ \ \ \ ]}} \\
+\small 2$^{\mbox{\scriptsize nd}}$ attribute & {\tt\scriptsize \textcolor{darkgreen}{[\ \ \ \ 1,\ \ \ \ \ 2,\ \ \ \ \ 3,\ \ \ \ \ 4,\ \ \ \ \ \ \ \ \ \ \ 5,\ \ \ \ \ 6,\ \ \ \ \ \ \ \ \ \ \ \ \ 7\ \ \ ]}}
+\end{tabular}
+
+\vspace{0.5 cm}
+If the numbers are more popular than the letters, raise the 2$^{\mbox{\scriptsize nd}}$ attribute into warmer cache (on the server) independently of the letters.
+
+\vspace{0.5 cm}
+To the degree that analysts' interests overlap (e.g.\ the all-popular kinematic variables), a copy in hot cache may be shared by all. This is impossible for private skims.
+\end{frame}
+
+\begin{frame}[fragile]{Case 2: overlapping dataset definitions}
+\vspace{1 cm}
+
+\begin{columns}
+\column{1.05\linewidth}
+\begin{tabular}{r l}
+\small logical data & {\tt\scriptsize \textcolor{blue}{[}\textcolor{violet}{[}(\textcolor{darkorange}{a},\textcolor{darkgreen}{1}), (\textcolor{darkorange}{b},\textcolor{darkgreen}{2}), (\textcolor{darkorange}{c},\textcolor{darkgreen}{3}), (\textcolor{darkorange}{d},\textcolor{darkgreen}{4})\textcolor{violet}{]}, \textcolor{violet}{[]}, \textcolor{violet}{[}(\textcolor{darkorange}{e},\textcolor{darkgreen}{5}), (\textcolor{darkorange}{f},\textcolor{darkgreen}{6})\textcolor{violet}{]}\textcolor{blue}{]}, \textcolor{blue}{[]}, \textcolor{blue}{[}\textcolor{violet}{[}(\textcolor{darkorange}{g},\textcolor{darkgreen}{7})\textcolor{violet}{]}\textcolor{blue}{]}\ \textcolor{white}{]}} \\\hline
+\small outer stops & {\tt\scriptsize \textcolor{blue}{[\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 3,\ \ 3,\ \ \ \ \ \ \ \ \ 4]}} \\
+\small inner stops & {\tt\scriptsize \textcolor{violet}{[\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 4,\ \ 4,\ \ \ \ \ \ \ \ \ \ \ \ \ \ 6,\ \ \ \ \ \ \ \ \ \ \ \ \ 7\ ]}} \\
+\small 1$^{\mbox{\scriptsize st}}$ attribute & {\tt\scriptsize \textcolor{darkorange}{[\ \ a,\ \ \ \ \ b,\ \ \ \ \ c,\ \ \ \ \ d,\ \ \ \ \ \ \ \ \ \ \ e,\ \ \ \ \ f,\ \ \ \ \ \ \ \ \ \ \ \ \ g\ \ \ \ \ ]}} \\
+\small 2$^{\mbox{\scriptsize nd}}$ attribute (v1) & {\tt\scriptsize \textcolor{darkgreen}{[\ \ \ \ 1,\ \ \ \ \ 2,\ \ \ \ \ 3,\ \ \ \ \ 4,\ \ \ \ \ \ \ \ \ \ \ 5,\ \ \ \ \ 6,\ \ \ \ \ \ \ \ \ \ \ \ \ 7\ \ \ ]}} \\
+\small 2$^{\mbox{\scriptsize nd}}$ attribute (v2) & {\tt\scriptsize \textcolor{darkgreen}{[\ \ \ \ 9,\ \ \ \ \ 9,\ \ \ \ \ 9,\ \ \ \ \ 9,\ \ \ \ \ \ \ \ \ \ \ 9,\ \ \ \ \ 9,\ \ \ \ \ \ \ \ \ \ \ \ \ 9\ \ \ ]}}
+\end{tabular}
+\end{columns}
+
+\vspace{0.5 cm}
+\begin{columns}[t]
+\column{0.4\linewidth}
+\textcolor{darkblue}{Dataset version 1 schema:}
+{\scriptsize
+\begin{verbatim}
+List(stops = "outer stops",
+  List(stops = "inner stops",
+    Pair(first = "1st attribute",
+         second = "2nd attribute (v1)"
+    )))
+\end{verbatim}}
+
+\vspace{0.5 cm}
+\column{0.4\linewidth}
+\textcolor{darkblue}{Dataset version 2 schema:}
+{\scriptsize
+\begin{verbatim}
+List(stops = "outer stops",
+  List(stops = "inner stops",
+    Pair(first = "1st attribute",
+         second = "2nd attribute (v2)"
+    )))
+\end{verbatim}}
+\end{columns}
+
+\vspace{-0.5 cm}
+\textcolor{gray}{(Not all arrays can be combined into datasets; validity determined by provenance.)}
+\end{frame}
 
 \end{document}
